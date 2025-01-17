@@ -1,0 +1,38 @@
+<%- include('../header'); -%>
+<form class="w-50 mx-auto" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <div class="mb-1">
+            <label for="file" class="form-label">Avatar opcional</label>
+            <input type="file" id="file" name="file"
+                accept=".png, .jpg, .jpeg, .gif, .bmp"
+                onchange="uploadFiles.onFileChange(event)" class="form-control">             
+        </div>        
+        <!-- Contenedor de imágenes para subir -->
+        <div class="d-flex flex-wrap justify-content-center align-items-center gap-1"
+            id="fileContainer">
+        </div>                    
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label"><label><b>(*) Email</b></label>
+        <input type="email" id="email" name="email"
+            value="<%= typeof(email) !== 'undefined' ? email : '' %>"
+            class="form-control" placeholder="Su e-mail" required>
+    </div>
+    <div class="mb-3">
+        <label for="username" class="form-label"><label><b>(*) Usuario</b></label>
+        <input type="text" id="username" name="username"
+            value="<%= typeof(username) !== 'undefined' ? username : '' %>"
+            class="form-control" placeholder="Su nombre de usuario" required>
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label"><label><b>(*) Contraseña</b></label>
+        <input type="password" id="password" name="password"
+            value="<%= typeof(password) !== 'undefined' ? password : '' %>"
+            class="form-control" placeholder="Su contraseña" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Resistrarse</button>
+</form>
+<p class="text-center">¿Ya tiene una cuenta? <a href="/auth/login">Iniciar Sesión</a></p>
+<p class="text-center fw-bold">(*) Campos obligatorios</p>
+<script src="/js/upload-files.js"></script>
+<%- include('../footer'); -%>

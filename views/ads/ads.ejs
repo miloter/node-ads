@@ -1,0 +1,136 @@
+<%- include('../header'); -%>
+    <div id="app" v-cloak></div>
+    <script src="https://unpkg.com/vue@3.4.5/dist/vue.global.js"></script>
+    <script type="module">
+        import { pluginGlobals } from '/js/plugins/plugin-globals.js';
+        import TableXp from '/js/TableXp/TableXp.js';
+
+        const App = Vue.createApp({
+            components: { TableXp },
+            template: /*html*/`
+                <div id="alert"></div>
+                <TableXp :headers="headers" :rows="rows" :rowsPerPage="5">
+                    <template #['username']="{ row }">
+                        <div class="d-flex flex-column justify-content-center align-items-center gap-1">
+                            <strong>
+                                {{ row.username }}
+                            </strong>
+                            <img v-if="row.avatar" :src="'/uploads/' + row.avatar" width="64"
+                                class="rounded-circle" alt="Avatar del usuario">                            
+                        </div>
+                    </template>
+                    <template #['text']="{ row }">
+                        <textarea v-if="user.id === row.user_id || user.is_admin"
+                            v-model="row.text"
+                            class="w-100" :rows="row.text.split('\\n').length + 2">{{ row.text }}</textarea>
+                        <template v-else>
+                            {{ row.text }}
+                        </template>
+                    </template>                    
+                    <template #['contact']="{ row }">
+                        <textarea v-if="user.id === row.user_id || user.is_admin"
+                            v-model="row.contact"
+                            class="w-100" :rows="row.contact.split('\\n').length + 2">{{ row.contact }}</textarea>
+                        <template v-else>
+                            {{ row.contact }}
+                        </template>
+                    </template>                    
+                    <template #['actions']="{ row }">
+                        <div v-if="user.id === row.user_id || user.is_admin" class="d-flex justify-content-center align-items-center gap-1">
+                            <a @click.prevent="onUpdate(row.id, row.text, row.contact)" class="btn btn-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a @click.prevent="onDelete(row.id)" class="btn btn-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </template>
+                </TableXp>    
+            `,
+            data() {
+                return {
+                    headers: [{
+                        title: 'Usuario',
+                        key: 'username',
+                        showFilter: true
+                    }, {
+                        title: 'Creado el',
+                        key: 'last_modified',
+                        showFilter: true
+                    }, {
+                        title: 'Texto',
+                        key: 'text',
+                        showFilter: true
+                    }, {
+                        title: 'Contacto',
+                        key: 'contact',
+                        showFilter: true
+                    }, {
+                        title: '',
+                        key: 'actions'
+                    }],
+                    rows: [],
+                    user: null
+                };
+            },
+            methods: {
+                reloadAds() {
+                    return fetch('/api/ads')
+                        .then(response => {
+                            return response.json();
+                        })
+                        .then(json => {
+                            if (json.error) throw new Error(json.error);
+                            this.rows = json.rows;
+                            this.user = json.user;
+                        })
+                        .catch(error => {
+                            this.appendAlert(error.message, 'danger');
+                        });
+                },
+                onUpdate(id, text, contact) {
+                    this.removeAlerts();                    
+                    // Envía un PUT para actualizar el anuncio
+                    fetch('/api/ads', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: new URLSearchParams({ id, text, contact })
+                    })
+                        .then(response => {
+                            return response.json()
+                        })
+                        .then(json => {
+                            if (json.error) throw new Error(json.error);
+                            this.appendAlert(json.success, 'success');
+                            this.reloadAds();
+                        })
+                        .catch(error => {
+                            this.appendAlert(error.message, 'danger');
+                        });
+                },
+                onDelete(id) {
+                    if (!confirm(`¿Eliminar el anuncio con ID ${id}?`)) return;
+                    this.removeAlerts();
+                    fetch(`/api/ads/${id}`, { method: 'DELETE' })
+                        .then(response => {
+                            return response.json()
+                        })
+                        .then(json => {
+                            if (json.error) throw new Error(json.error);
+                            this.reloadAds();
+                            this.appendAlert(json.success, 'success');
+                        })
+                        .catch(error => {
+                            this.appendAlert(error.message, 'danger');
+                        });
+                }
+            },
+            async created() {
+                await this.reloadAds();
+            }
+        });
+        App.use(pluginGlobals).mount('#app');
+    </script>
+    <%- include('../footer'); -%>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Status 500</title>
+    <style>
+        .center {
+            text-align: center;
+        }
+
+        .error {
+            color: darkorchid;
+            font-weight: bold;
+            font-size: 1.125rem;
+        }
+    </style>
+</head>
+<body>
+    <section class="center">
+        <h2>HTTP Status code: 500</h2>
+        <p class="error">La página que has solicitado ha provocado un error:</p>
+        <code>
+            <%= stack %>
+        </code>
+    </section>
+</body>
+</html>
